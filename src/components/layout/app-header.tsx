@@ -32,7 +32,7 @@ export function AppHeader({ profile }: { profile: Profile }) {
         <Link href="/" className="flex min-h-11 items-center gap-3">
           <BrandLogo size={32} />
           <div className="leading-tight">
-            <p className="text-sm font-semibold tracking-tight">Mana Onboarding</p>
+            <p className="text-sm font-semibold tracking-tight">Mana Marketing Hub</p>
             <p className="hidden text-xs text-muted-foreground sm:block">
               {isStaff(profile.role) ? roleLabel(profile.role) : "Intern workspace"}
             </p>

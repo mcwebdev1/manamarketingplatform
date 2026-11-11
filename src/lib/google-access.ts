@@ -20,7 +20,7 @@ export type GoogleAccessDecision =
 const ROLES: readonly string[] = ["intern", "admin", "master"]
 
 export const GOOGLE_NO_ACCESS_MESSAGE =
-  "This Google account does not have access to Mana Onboarding. Interns sign in with the email and PIN from their invite."
+  "This Google account does not have access to Mana Marketing Hub. Interns sign in with the email and PIN from their invite."
 
 export function normalizeEmail(value: unknown) {
   return typeof value === "string" ? value.trim().toLowerCase() : ""

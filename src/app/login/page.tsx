@@ -29,7 +29,7 @@ export default async function LoginPage({
         <GradientBar />
         <CardHeader className="items-center pt-8 text-center">
           <BrandLogo size={72} />
-          <CardTitle className="mt-4 text-2xl">Mana Onboarding</CardTitle>
+          <CardTitle className="mt-4 text-2xl">Mana Marketing Hub</CardTitle>
           <CardDescription className="max-w-sm text-sm leading-6">
             Staff sign in with Google. Interns use the email and PIN from their invite.
           </CardDescription>

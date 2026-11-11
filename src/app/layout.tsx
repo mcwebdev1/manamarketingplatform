@@ -18,10 +18,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Mana Onboarding",
-    template: "%s · Mana Onboarding",
+    default: "Mana Marketing Hub",
+    template: "%s · Mana Marketing Hub",
   },
-  description: "Assign function-specific onboarding modules to interns.",
+  description: "Learning and intern time for the Mana marketing team.",
 }
 
 export default function RootLayout({
