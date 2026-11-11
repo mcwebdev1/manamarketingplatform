@@ -133,11 +133,23 @@ The same page interns use, shown to managers and the master when they have assig
 | Edit library | yes | yes | no |
 | Staff list, roles, demo data | yes | no | no |
 
+## Schema the redesign starts from
+
+Checked against production on 2026-11-11. Do not add columns that are already there, and do not rename the ones below.
+
+- The manager role value stays `admin`. The screen says Manager.
+- `assignments.intern_id` stays the column name, including when the assignee is staff.
+- `assignments` already has `assigned_by`, `started_at`, and `completed_at`. The only missing assignment column is `due_date date null`.
+- These module columns stay: `slug`, `platform`, `content`, `estimated_minutes`, `is_published`.
+  - The app writes `slug` from the title, and writes `content` as an empty string, when a module is created. It writes `title` and `description` on create and edit.
+  - The app does not read or write `platform`, `estimated_minutes`, or `is_published`. It does not show `content`. The links on screen are `module_links`.
+- Not in the database yet: `profiles.tracks_time`, `assignments.due_date`, a `team_status` view, a PIN reset function, and functions to add, revoke, or restore a staff address.
+
 ## Database changes (Supabase, as migrations)
 
 1. `profiles.tracks_time boolean not null default false`; backfill `true` for interns. Schedule and clock policies check this flag, not the role.
-2. `assignments.due_date date null`, `assignments.assigned_by uuid`, `assignments.started_at`, `assignments.completed_at`.
-3. Assignment RLS: allow `admin` and `master` to insert/update/delete rows where the target profile's role is `admin` or `master`; allow a manager to select staff assignments where `assigned_by = auth.uid()`; let every user select and update status on their own rows.
+2. Add `assignments.due_date date null` only. Leave `assigned_by`, `started_at`, `completed_at`, `intern_id`, and the `admin` role value as they are.
+3. Assignment RLS: allow `admin` and `master` to insert/update/delete rows where the target profile's role is `admin` or `master`; allow a manager to select staff assignments where `assigned_by = auth.uid()`; let every user select and update status on their own rows. Today any manager can select every assignment, and `can_manage_intern` only succeeds when the target role is `intern`.
 4. Remove the redirect that sends staff away from the learner page.
 5. Staff allowlist: master-only RPCs to add, revoke and restore an address, used by the Settings screen.
 6. PIN reset RPC for a person's manager or the master.
@@ -159,6 +171,7 @@ Keep what is already distinctive: the dark surface, the round M mark, the thin r
 | Phase | Ships | Touches DB |
 | --- | --- | --- |
 | 0. Setup | Supabase connected to Cursor, migrations in the repo, preview environment, rename to Marketing Hub | no |
+| 0.5 History and local DB | History repair proposed, not run. Local CLI config and seed. Brief matched to the live schema. | history table only, after approval |
 | 1. Team and person page | New Team list, person page, Add person sheet; remove Overview, Interns, Assign tabs | view, PIN reset |
 | 2. Schedule | Merged grid, cell popover, week shortcuts, phone day view | no |
 | 3. Learning for staff | My learning for all roles, manager-to-manager sending, due dates | yes |
