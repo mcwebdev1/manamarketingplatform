@@ -9,11 +9,15 @@ import { createClient } from "@/lib/supabase/server"
 import { isMaster } from "@/lib/types"
 
 function revalidatePeople(internId?: string) {
+  revalidatePath("/team")
   revalidatePath("/admin")
   revalidatePath("/admin/people")
   revalidatePath("/admin/assign")
   revalidatePath("/onboarding")
-  if (internId) revalidatePath(`/admin/people/${internId}`)
+  if (internId) {
+    revalidatePath(`/team/${internId}`)
+    revalidatePath(`/admin/people/${internId}`)
+  }
 }
 
 export async function createInternAccount(input: {

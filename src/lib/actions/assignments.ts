@@ -49,6 +49,8 @@ export async function saveInternAssignments(
   }
 
   revalidatePath("/onboarding")
+  revalidatePath("/team")
+  revalidatePath(`/team/${internId}`)
   revalidatePath("/admin")
   revalidatePath("/admin/people")
   revalidatePath("/admin/assign")
@@ -117,8 +119,125 @@ export async function updateAssignmentStatus(
   if (error) return { error: error.message }
 
   revalidatePath("/onboarding")
+  revalidatePath("/team")
   revalidatePath("/admin")
   revalidatePath("/admin/people")
   revalidatePath("/admin/assign")
+  return { success: true }
+}
+
+type SavedAssignment = {
+  status: Enums<"assignment_status">
+  started_at: string | null
+  completed_at: string | null
+  assigned_by: string | null
+}
+
+function revalidateAssignment(personId: string) {
+  revalidatePath("/onboarding")
+  revalidatePath("/team")
+  revalidatePath(`/team/${personId}`)
+  revalidatePath("/admin")
+  revalidatePath("/admin/people")
+  revalidatePath(`/admin/people/${personId}`)
+}
+
+// Adds modules that are not already assigned. Does not remove any.
+export async function sendModules(personIds: string[], moduleIds: string[]) {
+  const admin = await requireAdmin()
+  if (moduleIds.length === 0) return { error: "Choose a module" }
+  const supabase = await createClient()
+
+  for (const personId of personIds) {
+    const scopeError = await managedInternError(admin, personId)
+    if (scopeError) return { error: scopeError }
+
+    const { data: existing, error: existingError } = await supabase
+      .from("assignments")
+      .select("module_id")
+      .eq("intern_id", personId)
+    if (existingError) return { error: existingError.message }
+
+    const current = new Set((existing ?? []).map((row) => row.module_id))
+    const toInsert = moduleIds.filter((id) => !current.has(id))
+    if (toInsert.length === 0) continue
+
+    const { error } = await supabase.from("assignments").insert(
+      toInsert.map((moduleId) => ({
+        intern_id: personId,
+        module_id: moduleId,
+        assigned_by: admin.id,
+      }))
+    )
+    if (error) return { error: error.message }
+    revalidateAssignment(personId)
+  }
+
+  return { success: true }
+}
+
+export async function setPersonModule(personId: string, moduleId: string, assigned: boolean) {
+  const admin = await requireAdmin()
+  const scopeError = await managedInternError(admin, personId)
+  if (scopeError) return { error: scopeError }
+  const supabase = await createClient()
+
+  if (!assigned) {
+    const { data, error } = await supabase
+      .from("assignments")
+      .delete()
+      .eq("intern_id", personId)
+      .eq("module_id", moduleId)
+      .select("status, started_at, completed_at, assigned_by")
+      .maybeSingle()
+    if (error) return { error: error.message }
+    revalidateAssignment(personId)
+    return { success: true as const, removed: data as SavedAssignment | null }
+  }
+
+  const { error } = await supabase.from("assignments").insert({
+    intern_id: personId,
+    module_id: moduleId,
+    assigned_by: admin.id,
+  })
+  if (error && error.code !== "23505") return { error: error.message }
+  revalidateAssignment(personId)
+  return { success: true as const, removed: null }
+}
+
+export async function restorePersonModule(
+  personId: string,
+  moduleId: string,
+  previous: SavedAssignment | null
+) {
+  const admin = await requireAdmin()
+  const scopeError = await managedInternError(admin, personId)
+  if (scopeError) return { error: scopeError }
+  const supabase = await createClient()
+
+  if (!previous) {
+    const { error } = await supabase
+      .from("assignments")
+      .delete()
+      .eq("intern_id", personId)
+      .eq("module_id", moduleId)
+    if (error) return { error: error.message }
+    revalidateAssignment(personId)
+    return { success: true }
+  }
+
+  const { error } = await supabase.from("assignments").upsert(
+    {
+      intern_id: personId,
+      module_id: moduleId,
+      assigned_by: previous.assigned_by ?? admin.id,
+      status: previous.status,
+      started_at: previous.started_at,
+      completed_at: previous.completed_at,
+    },
+    { onConflict: "intern_id,module_id" }
+  )
+  if (error) return { error: error.message }
+  revalidateAssignment(personId)
   return { success: true }
 }

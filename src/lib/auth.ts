@@ -33,7 +33,7 @@ export async function requireProfile() {
 
 export async function requireIntern() {
   const profile = await requireProfile()
-  if (isStaff(profile.role)) redirect("/admin")
+  if (isStaff(profile.role)) redirect("/team")
   return profile
 }
 
@@ -45,7 +45,7 @@ export async function requireAdmin() {
 
 export async function requireMaster() {
   const profile = await requireAdmin()
-  if (!isMaster(profile.role)) redirect("/admin")
+  if (!isMaster(profile.role)) redirect("/team")
   return profile
 }
 

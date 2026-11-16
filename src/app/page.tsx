@@ -5,6 +5,6 @@ import { isStaff } from "@/lib/types"
 export default async function Home() {
   const profile = await getCurrentProfile()
   if (!profile) redirect("/login")
-  if (isStaff(profile.role)) redirect("/admin")
+  if (isStaff(profile.role)) redirect("/team")
   redirect("/onboarding")
 }

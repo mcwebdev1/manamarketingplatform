@@ -6,6 +6,7 @@ import { BrandLogo } from "@/components/brand/logo"
 import { GradientBar } from "@/components/brand/gradient-bar"
 import { SignOutButton } from "@/components/auth/sign-out-button"
 import { displayLogin } from "@/lib/login"
+import { copy } from "@/lib/copy"
 import { isStaff, roleLabel, type Profile } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -15,11 +16,9 @@ const internLinks = [
 ]
 
 const adminLinks = [
-  { href: "/admin", label: "Overview" },
-  { href: "/admin/people", label: "Interns" },
-  { href: "/admin/modules", label: "Modules" },
-  { href: "/admin/assign", label: "Assign" },
-  { href: "/admin/schedule", label: "Schedule" },
+  { href: "/team", label: copy.nav.team },
+  { href: "/admin/modules", label: copy.nav.library },
+  { href: "/admin/schedule", label: copy.nav.schedule },
 ]
 
 export function AppHeader({ profile }: { profile: Profile }) {
@@ -53,7 +52,7 @@ export function AppHeader({ profile }: { profile: Profile }) {
           <SignOutButton />
         </div>
       </div>
-      <nav aria-label="Mobile" className="flex gap-1 overflow-x-auto px-4 pb-3 md:hidden">
+      <nav aria-label="Mobile" className="flex flex-wrap gap-1 px-4 pb-3 md:hidden">
         {links.map((link) => (
           <NavLink key={link.href} href={link.href} pathname={pathname} label={link.label} />
         ))}
@@ -72,7 +71,7 @@ function NavLink({
   pathname: string
   label: string
 }) {
-  const active = href === "/admin" ? pathname === "/admin" : pathname.startsWith(href)
+  const active = pathname === href || pathname.startsWith(`${href}/`)
 
   return (
     <Link

@@ -80,6 +80,8 @@ export async function overrideInternSchedule(
   if (error) return { error: error.message }
 
   revalidatePath("/admin/schedule")
+  revalidatePath("/team")
+  revalidatePath(`/team/${scope.internId}`)
   return { success: true }
 }
 

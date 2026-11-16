@@ -171,12 +171,12 @@ Keep what is already distinctive: the dark surface, the round M mark, the thin r
 | Phase | Ships | Touches DB |
 | --- | --- | --- |
 | 0. Setup | Supabase connected to Cursor, migrations in the repo, preview environment, rename to Marketing Hub | no |
-| 0.5 History and local DB | History repair proposed, not run. Local CLI config and seed. Brief matched to the live schema. | history table only, after approval |
-| 1. Team and person page | New Team list, person page, Add person sheet; remove Overview, Interns, Assign tabs | view, PIN reset |
+| 0.5 History and local DB | Parked. The repair plan and local Supabase config stay in the repo and move to Phase 5. | none until Phase 5 |
+| 1. Team and person page | New Team list, person page, Add person sheet; remove Overview, Interns, Assign tabs. Status is computed in the app until a view is approved. | none until approved |
 | 2. Schedule | Merged grid, cell popover, week shortcuts, phone day view | no |
 | 3. Learning for staff | My learning for all roles, manager-to-manager sending, due dates | yes |
 | 4. Phone pass | Bottom tab bar, Team and Schedule at 375px, intern Today page | no |
-| 5. Settings and cleanup | Staff list screen, demo accounts out, old routes redirected | yes |
+| 5. Settings and cleanup | Staff list screen, demo accounts out, old routes redirected, migration history repair, local Supabase | yes |
 
 Acceptance checks to give Cursor for every phase: works at 375px and 1280px with no sideways scroll; a manager can add an intern, send modules and hand over the PIN without leaving one sheet; setting a full week takes at most three clicks; RLS tests pass for master, manager and intern.
 
@@ -184,8 +184,12 @@ Acceptance checks to give Cursor for every phase: works at 375px and 1280px with
 
 - **GitHub**: already connected. Work on a branch per phase and open a PR for each.
 - **Supabase**: add the Supabase MCP server in Cursor (Settings → MCP → add server, type `http`, URL `https://mcp.supabase.com/mcp`, then sign in when prompted). Scope it to this one project.
-- **Schema changes go through files**, not the dashboard: `supabase/migrations/*.sql` in the repo, applied with the Supabase CLI or the MCP's migration tool. That way every database change is in the PR.
-- **Do not point the agent at production while building.** Use a Supabase branch or a second project for development; apply migrations to production only after the PR is merged.
+- Until real users start, build against the live project `manamarketingplatform`.
+- Apply database changes through the Supabase plugin. Do not use `supabase db push`.
+- Show the SQL and wait for approval before applying it. Save the same SQL as a file in `supabase/migrations` in the commit that applies it.
+- Additive changes only. Ask before dropping or renaming anything.
+- Leave `platform`, `estimated_minutes`, `is_published`, and `content` untouched.
+- Migration history repair and the local Supabase stack wait until Phase 5.
 - First prompt for Cursor: "Read `docs/redesign-brief.md`. Pull the current schema and RLS policies into `supabase/migrations` as a baseline, list any differences from the brief's assumptions, then propose the Phase 0 PR. Do not change production."
 
 ## Open items for the owner
